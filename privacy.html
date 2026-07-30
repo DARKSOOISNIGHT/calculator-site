@@ -6,22 +6,12 @@
 <title>개인정보처리방침 - 3.3% 계산기</title>
 <style>
   :root {
-    --bg: #f2f0ea;
-    --card-bg: #fffefc;
-    --text: #2b2825;
-    --text-muted: #8b8680;
-    --border: #ded9d2;
-    --accent: #74889a;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1a17;
-      --card-bg: #252220;
-      --text: #ede9e4;
-      --text-muted: #a39d95;
-      --border: #3a3632;
-      --accent: #93a4b3;
-    }
+    --bg: #ffffff;
+    --card-bg: #ffffff;
+    --text: #333333;
+    --text-muted: rgba(51, 51, 51, 0.65);
+    --border: #d9d8db;
+    --accent-bg: #d3e2f0;
   }
   body {
     margin: 0;
@@ -35,7 +25,7 @@
   h1 { font-size: 1.3rem; }
   h2 { font-size: 1.05rem; margin-top: 24px; }
   p, li { font-size: 0.92rem; color: var(--text-muted); }
-  a { color: var(--accent); }
+  a { color: var(--text); text-decoration-color: var(--accent-bg); text-decoration-thickness: 2px; }
   .back { display: inline-block; margin-bottom: 16px; font-size: 0.9rem; }
 </style>
 </head>
