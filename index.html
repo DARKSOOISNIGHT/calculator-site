@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3.3% 계산기 - 프리랜서 원천징수세 계산기</title>
+<meta name="description" content="프리랜서·사업소득 3.3% 원천징수세를 지급액 또는 실수령액 기준으로 바로 계산해보세요." />
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card-bg: #ffffff;
+    --text: #1a1d23;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+    --result-bg: #f0fdf4;
+    --result-border: #bbf7d0;
+    --result-text: #15803d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111318;
+      --card-bg: #1a1d24;
+      --text: #e8e9ec;
+      --text-muted: #9aa0ac;
+      --border: #2a2e37;
+      --accent: #60a5fa;
+      --accent-bg: #1e293b;
+      --result-bg: #0f2419;
+      --result-border: #1f4a30;
+      --result-text: #4ade80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+  header { margin-bottom: 24px; }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; }
+  .sub { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+  }
+  .tab.active {
+    background: var(--accent-bg);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  label { display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 6px; }
+  .input-row { position: relative; margin-bottom: 20px; }
+  input[type="text"] {
+    width: 100%;
+    font-size: 1.25rem;
+    padding: 14px 44px 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  .unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+  .result {
+    background: var(--result-bg);
+    border: 1px solid var(--result-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .result .big { font-size: 1.8rem; font-weight: 700; color: var(--result-text); margin: 0 0 4px; }
+  .result .label { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 12px; }
+  .breakdown { font-size: 0.9rem; }
+  .breakdown div { display: flex; justify-content: space-between; padding: 4px 0; color: var(--text-muted); }
+  .breakdown div span:last-child { color: var(--text); font-variant-numeric: tabular-nums; }
+
+  .note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 16px;
+  }
+
+  .explain h2 { font-size: 1.05rem; margin: 0 0 8px; }
+  .explain p { font-size: 0.92rem; color: var(--text-muted); margin: 0 0 10px; }
+
+  footer {
+    margin-top: 32px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  footer a { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>3.3% 계산기</h1>
+    <p class="sub">프리랜서·사업소득 원천징수세(소득세 3% + 지방소득세 0.3%)를 바로 계산해보세요.</p>
+  </header>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" id="tab-gross" onclick="setMode('gross')">받기로 한 금액 기준</button>
+      <button class="tab" id="tab-net" onclick="setMode('net')">실수령액 기준</button>
+    </div>
+
+    <label id="input-label" for="amount">받기로 한 금액 (세전, 원)</label>
+    <div class="input-row">
+      <input type="text" id="amount" inputmode="numeric" placeholder="예: 1,000,000" />
+      <span class="unit">원</span>
+    </div>
+
+    <div class="result">
+      <p class="big" id="result-main">0원</p>
+      <p class="label" id="result-label">실수령액</p>
+      <div class="breakdown">
+        <div><span>소득세 (3%)</span><span id="tax-income">0원</span></div>
+        <div><span>지방소득세 (0.3%)</span><span id="tax-local">0원</span></div>
+        <div><span>원천징수세액 합계 (3.3%)</span><span id="tax-total">0원</span></div>
+      </div>
+    </div>
+
+    <p class="note">계산 결과는 3.3% 정률만 반영한 단순 추정치입니다. 실제 지급 금액은 계약 조건, 4대보험 여부 등에 따라 달라질 수 있고, 최종 세액은 다음 해 종합소득세 신고로 정산됩니다. 정확한 세무 판단은 국세청 홈택스 또는 세무사를 통해 확인하세요.</p>
+  </div>
+
+  <div class="card explain">
+    <h2>3.3%란?</h2>
+    <p>프리랜서·강사·유튜버 협찬비 등 사업소득을 지급받을 때, 지급하는 쪽(회사·개인)이 소득세법에 따라 소득세 3%와 지방소득세 0.3%(소득세의 10%)를 합한 3.3%를 미리 떼어 국세청에 대신 납부합니다. 근로소득자의 4대보험 공제와는 다른 개념으로, 사업소득은 원천징수세만 공제되고 국민연금·건강보험 등은 별도로 공제되지 않는 경우가 많습니다.</p>
+    <p>이렇게 미리 뗀 세금은 다음 해 5월 종합소득세 신고를 통해 실제 소득과 경비를 반영해 정산되며, 이 과정에서 환급되거나 추가 납부가 발생할 수 있습니다.</p>
+  </div>
+
+  <footer>
+    <p>이 계산기는 참고용이며 법적 효력이 없습니다 · <a href="privacy.html">개인정보처리방침</a></p>
+  </footer>
+</div>
+
+<script>
+  let mode = 'gross';
+
+  function setMode(next) {
+    mode = next;
+    document.getElementById('tab-gross').classList.toggle('active', mode === 'gross');
+    document.getElementById('tab-net').classList.toggle('active', mode === 'net');
+    document.getElementById('input-label').textContent =
+      mode === 'gross' ? '받기로 한 금액 (세전, 원)' : '실제로 받고 싶은 금액 (세후, 원)';
+    document.getElementById('amount').value = '';
+    calc();
+  }
+
+  function toNumber(str) {
+    const n = parseFloat(String(str).replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmt(n) {
+    return Math.round(n).toLocaleString('ko-KR') + '원';
+  }
+
+  function calc() {
+    const raw = toNumber(document.getElementById('amount').value);
+    let gross, net, incomeTax, localTax, totalTax;
+
+    if (mode === 'gross') {
+      gross = raw;
+      incomeTax = gross * 0.03;
+      localTax = gross * 0.003;
+      totalTax = incomeTax + localTax;
+      net = gross - totalTax;
+      document.getElementById('result-label').textContent = '실수령액';
+      document.getElementById('result-main').textContent = fmt(net);
+    } else {
+      net = raw;
+      gross = raw / 0.967;
+      incomeTax = gross * 0.03;
+      localTax = gross * 0.003;
+      totalTax = incomeTax + localTax;
+      document.getElementById('result-label').textContent = '받아야 할 세전 금액';
+      document.getElementById('result-main').textContent = fmt(gross);
+    }
+
+    document.getElementById('tax-income').textContent = fmt(incomeTax);
+    document.getElementById('tax-local').textContent = fmt(localTax);
+    document.getElementById('tax-total').textContent = fmt(totalTax);
+  }
+
+  document.getElementById('amount').addEventListener('input', function (e) {
+    const n = toNumber(e.target.value);
+    e.target.value = n ? n.toLocaleString('ko-KR') : '';
+    calc();
+  });
+
+  document.getElementById('amount').value = '1,000,000';
+  calc();
+</script>
+</body>
+</html>
